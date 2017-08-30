@@ -14,8 +14,6 @@ const loadConfig =_.curry(function configLoader(cwd, globStr) {
 
         return files.reduce(
             (result, file) => {
-                debugger;
-
                 let filePath = path.resolve(cwd, file);
 
                 let config = require(filePath);
