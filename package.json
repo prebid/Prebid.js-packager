@@ -1,0 +1,34 @@
+{
+  "name": "prebid-packager",
+  "version": "0.0.1",
+  "description": "A packaging implementation for enterprise Prebid.js setups",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node packager.js",
+    "package": "node packager.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rubicon-project/prebid-packager.git"
+  },
+  "keywords": [
+    "prebid",
+    "enterprise",
+    "packaging"
+  ],
+  "author": "the prebid.js contributors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/rubicon-project/prebid-packager/issues"
+  },
+  "homepage": "https://github.com/rubicon-project/prebid-packager#readme",
+  "devDependencies": {
+    "jest": "^20.0.4"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "glob": "^7.1.2",
+    "lodash": "^4.17.4"
+  }
+}

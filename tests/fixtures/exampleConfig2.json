@@ -1,0 +1,23 @@
+{
+  "pub2": {
+    "version": "0.25.0",
+    "packages": [
+      {
+        "filename": "pub2-site1.js",
+        "modules": [
+          "appnexusBidAdapter"
+        ],
+        "code": [
+          "./adUnits.js"
+        ]
+      },
+      {
+        "filename": "pub2-site2.json",
+        "code": {
+          "adUnits": "./adUnits.js",
+          "digitrust": "http://cdn.digitru.st/prod/1/digitrust.min.js"
+        }
+      }
+    ]
+  }
+}

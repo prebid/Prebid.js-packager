@@ -1,0 +1,16 @@
+{
+  "pub1": {
+    "version": "0.26.0",
+    "packages": [
+      {
+        "filename": "pub1-site1.js",
+        "modules": [
+          "rubiconBidAdapter"
+        ],
+        "code": [
+          "./adUnits.js"
+        ]
+      }
+    ]
+  }
+}
