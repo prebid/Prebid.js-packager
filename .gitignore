@@ -60,3 +60,6 @@ typings/
 # JetBrains stuff
 .idea/
 
+# Temporary working directory
+_tmp/
+

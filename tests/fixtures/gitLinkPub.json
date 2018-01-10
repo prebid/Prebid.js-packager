@@ -1,0 +1,42 @@
+{
+  "pub2": {
+    "version": "github:prebid/Prebid.js#0.32.0",
+    "packages": [
+      {
+        "filename": "pub2-site1.js",
+        "modules": [
+          "appnexusBidAdapter"
+        ],
+        "code": [
+          "./adUnits.js"
+        ]
+      },
+      {
+        "filename": "pub2-site2.json",
+        "code": {
+          "adUnits": "./adUnits.js",
+          "digitrust": "http://cdn.digitru.st/prod/1/digitrust.min.js"
+        }
+      }
+    ]
+  },
+  "pub3": {
+    "version": "0.32.0",
+    "packages": [
+      {
+        "filename": "pub3-site1.js",
+        "modules": [
+          "appnexusBidAdapter",
+          "rubiconBidAdapter"
+        ]
+      },
+      {
+        "filename": "pub3-site2.json",
+        "code": {
+          "adUnits": "./adUnits2.js",
+          "digitrust": "http://cdn.digitru.st/prod/1/digitrust.min.js"
+        }
+      }
+    ]
+  }
+}

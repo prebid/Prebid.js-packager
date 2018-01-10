@@ -1,4 +1,4 @@
-let pbjs = windonw.pbjs || {};
+let pbjs = window.pbjs || {};
 pbjs.queue = pbjs.queue || [];
 
 pbjs.queue.push(function() {
