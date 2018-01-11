@@ -1,10 +1,12 @@
 
 let shell = require('shelljs');
 
-let { install } = require('./prebidInstaller.js');
+let prebidInstall = require('./prebidInstaller.js').install;
+let codeInstall = require('./codeInstaller.js').install;
 let {
     loadConfig,
-    getPrebidInstallList
+    getPrebidInstallList,
+    getCodeList
 } = require('./configLoader');
 
 module.exports = function run(cwd, configPaths) {
@@ -16,9 +18,13 @@ module.exports = function run(cwd, configPaths) {
     configLoader(configPaths)
         .then(config => {
             let versions = getPrebidInstallList(config);
+            let code = getCodeList(config);
 
-            return install(versions);
+            return Promise.all([
+                prebidInstall(versions),
+                codeInstall(code)
+            ]);
         }).then(results => {
             console.log(results);
-        })
+        });
     };

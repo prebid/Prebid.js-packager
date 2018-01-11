@@ -16,7 +16,7 @@ function install(versions, config) {
         outputDir: './build/prebid'
     }, config);
 
-    console.log("Cleaning working directory...");
+    console.log("Cleaning prebid installer working directory...");
 
     shell.rm('-rf', config.workingDir);
 
