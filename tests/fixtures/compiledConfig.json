@@ -1,0 +1,57 @@
+{
+  "pub2": {
+    "version": "0.27.1",
+    "packages": [
+      {
+        "filename": "pub2-site1.js",
+        "modules": [
+          "appnexusBidAdapter"
+        ],
+        "code": [
+          "/prebid-packager/tests/fixtures/adUnits.js"
+        ]
+      },
+      {
+        "filename": "pub2-site2.json",
+        "code": {
+          "adUnits": "/prebid-packager/tests/fixtures/adUnits.js",
+          "digitrust": "http://cdn.digitru.st/prod/1/digitrust.min.js"
+        }
+      }
+    ]
+  },
+  "pub3": {
+    "version": "1.0.0",
+    "packages": [
+      {
+        "filename": "pub3-site1.js",
+        "modules": [
+          "appnexusBidAdapter",
+          "rubiconBidAdapter"
+        ]
+      },
+      {
+        "filename": "pub3-site2.json",
+        "code": {
+          "adUnits": "/prebid-packager/tests/fixtures/adUnits2.js",
+          "digitrust": "http://cdn.digitru.st/prod/1/digitrust.min.js"
+        }
+      }
+    ]
+  },
+  "pub4": {
+    "version": "0.29.0",
+    "packages": [
+      {
+        "filename": "pub4-site1.js",
+        "modules": [
+          "appnexusBidAdapter",
+          "rubiconBidAdapter"
+        ]
+      },
+      {
+        "filename": "pub4-site1.json"
+      }
+    ]
+  }
+}

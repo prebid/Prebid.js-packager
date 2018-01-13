@@ -63,3 +63,4 @@ typings/
 # Temporary working directory
 _tmp/
 
+build

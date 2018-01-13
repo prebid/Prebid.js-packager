@@ -130,6 +130,9 @@ function validateConfigs(configs) {
                             if (!Array.isArray(pkg.modules)) {
                                 errors.push(`invalid modules supplied for "${pkg.filename}" package`);
                             }
+                            if (pkg.code && !Array.isArray(pkg.code)) {
+                                errors.push(`invalid code supplied for "${pkg.filename} package`);
+                            }
                         } else if (ext === '.json') {
                             if (pkg.modules) {
                                 errors.push(`modules erroneously specified for manifest "${pkg.filename}" package`);

@@ -1,0 +1,5 @@
+{
+  "/prebid-packager/tests/fixtures/adUnits.js": "build/code/34cb974.js",
+  "http://cdn.digitru.st/prod/1/digitrust.min.js": "build/code/e775040.js",
+  "/prebid-packager/tests/fixtures/adUnits2.js": "build/code/10a065c.js"
+}
