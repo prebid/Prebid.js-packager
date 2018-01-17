@@ -59,43 +59,46 @@ function buildFromManifest(cwd, manifest, modules, codes) {
     cwd = path.resolve(cwd);
 
     return Promise.all([
-        new Promise((resolve, reject) =>
-            Promise.all(_.map(manifest.code, (codePath, code) => new Promise((resolve, reject) => {
-                if (
-                    Array.isArray(manifest.code) ||
-                    Array.isArray(codes) && codes.includes(code)
-                ) {
-                    fs.readFile(
-                        path.join(cwd, codePath),
-                        (err, data) => err ? reject(err) : resolve(data)
-                    );
-                }
-            }))).then(results => {
-                resolve(results.join('\n'));
-            })
-        ),
+        Promise.all(_.map(manifest.code, (codePath, code) => new Promise((resolve, reject) => {
+            function readFile() {
+                fs.readFile(
+                    path.join(cwd, codePath),
+                    (err, data) => err ? reject(err) : resolve(data)
+                );
+            }
+
+            if (Array.isArray(manifest.code)) {
+                readFile();
+            } else if (Array.isArray(codes) && codes.includes(code)) {
+                readFile();
+            } else {
+                resolve('');
+            }
+        }))).then(results => results.filter(result => result).join('\n')),
         new Promise((resolve, reject) => {
             fs.readFile(
                 path.join(cwd, manifest.main),
                 (err, data) => err ? reject(err) : resolve(data)
             );
         }),
-        new Promise((resolve, reject) =>
-            Promise.all(_.map(manifest.modules, (modulePath, module) => new Promise((resolve, reject) => {
-                if (
-                    Array.isArray(manifest.modules) ||
-                    Array.isArray(modules) && modules.includes(module)
-                ) {
-                    fs.readFile(
-                        path.join(cwd, modulePath),
-                        (err, data) => err ? reject(err) : resolve(data)
-                    );
-                }
-            }))).then(results => {
-                resolve(results.join('\n'));
-            })
-        )
+        Promise.all(_.map(manifest.modules, (modulePath, module) => new Promise((resolve, reject) => {
+            function readFile() {
+                fs.readFile(
+                    path.join(cwd, modulePath),
+                    (err, data) => err ? reject(err) : resolve(data)
+                );
+            }
+
+            if (Array.isArray(manifest.modules)) {
+                readFile();
+            } else if (Array.isArray(modules) && modules.includes(module)) {
+                readFile();
+            } else {
+                resolve('');
+            }
+        }))).then(results => results.filter(result => result).join('\n'))
     ]).then(results => {
+        results.push(manifest.postfix);
         return results.join('\n');
     });
 }
