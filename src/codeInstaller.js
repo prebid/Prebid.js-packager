@@ -5,6 +5,7 @@ let shell   = require('shelljs'),
     path    = require('path'),
     http    = require('http'),
     fs      = require('fs'),
+    uglify  = require('uglify-js'),
     _       = require('lodash');
 
 function download(url, dest, cb) {
@@ -55,10 +56,18 @@ function install(code, config) {
                 console.log(`Copying code file ${resource}...`);
 
                 // TODO: maybe add some build tools here, like browserify or webpack and stuff
-                fs.readFile(resource, (err, data) => {
+                fs.readFile(resource, 'utf-8', (err, data) => {
                     if (err) {
                         return reject(err);
                     }
+
+                    let minified = uglify.minify(data);
+
+                    if (minified.error) {
+                        return reject(minified.error);
+                    }
+
+                    data = minified.code;
 
                     fs.writeFile(outputFile, data, (err) => {
                         if (err) {
