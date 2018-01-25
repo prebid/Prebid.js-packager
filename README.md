@@ -58,15 +58,15 @@ The Packager's configuration files are `.json` files that follow a schema simila
 Each of these top-level objects in a Packager configuration file are used for tracking a specific version of Prebid.js 
 and a set of Prebid.js "packages" that you wish to have built, using that version, into either Prebid.js javascript 
 bundles or Packager manifest files which can facilitate creating dynamic Prebid.js javascript bundles.  The keys on
-these top-level objects is expected to be unique (e.g. "pub1", "pub2" etc).
+these top-level objects are expected to be unique (e.g. "pub1", "pub2" etc).
 
 The `version` field for each top-level Packager object specifies which version of Prebid.js will be used for the enclosed
 packages.  The only requirement of the version specified is that it be a valid version of Prebid.js that has support for
 Prebid.js modules: `version >= 0.26.0`.
 
 The `packages` array is where you define each of the Prebid.js javascript bundles or Packager manifest files that 
-will be created when the Packager is run.  Which type of file is built will depend on the filename supplied for the
-package.  The type of file generated will dictate which values are allowed in the rest of the package object.
+will be created when the Packager is run.  Which type of file is built will depend on the filename extension supplied
+for the package.  The type of file generated will dictate which values are allowed in the rest of the package object.
 
 ### Javascript .js bundle package
 
@@ -120,9 +120,9 @@ The manifest file contents will look similar to this:
 
 The manifest file contains a description of how to find the various parts of a Prebid.js browser bundle by listing
 where those parts can be found on the local filesystem (relative to the manifest file).
-* `main` includes the location to the `prebid-core.js` file.  This file includes all the core code for running Prebid.js.
+* `main` includes the location of the `prebid-core.js` file.  This file includes all the core code for running Prebid.js.
 * `modules` will contain a list of every module available for the package (not all listed in this example for brevity's 
-    sake) and the location of where it can be found on the filesystem if you wish to include them.
+    sake) and the location of where they can be found on the filesystem if you wish to include them.
 * `code` will contain a list of all the external code that was listed in the Packager configuration file for this package
     and its resultant location on the filesystem should you wish to include it.
 * `postfix` is a string of code that should be included at the end of a manually created bundle.  This is the command
