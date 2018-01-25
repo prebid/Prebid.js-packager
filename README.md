@@ -168,5 +168,5 @@ node bundle.js ./build/packages/pub2-site2.json -o ./dist/bundle.js
 You may also specify which modules and code inclusions you would like in your bundle.
 
 ```bash
-node bundle.js ./build/packages/pub2-site2.json -modules=rubiconBidAdapter,appnexusBidAdapter --code=adUnits,digitrust
+node bundle.js ./build/packages/pub2-site2.json --modules=rubiconBidAdapter,appnexusBidAdapter --code=adUnits,digitrust
 ```
