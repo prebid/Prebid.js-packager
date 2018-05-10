@@ -24,15 +24,13 @@ function download(url, dest, cb) {
 }
 
 function install(code, config) {
-    config = Object.assign({
-        workingDir: './_tmp/code',
-        outputDir: './build/code'
-    }, config);
+    let workingDir = path.join(config.workingDir, 'code');
+    let outputDir = path.join(config.outputDir, 'code');
 
     console.log("Cleaning code installer working directory...");
 
-    shell.rm('-rf', config.workingDir);
-    shell.mkdir('-p', config.outputDir);
+    shell.rm('-rf', workingDir);
+    shell.mkdir('-p', outputDir);
 
     return (
         Promise.all(code.map(resource => new Promise((resolve, reject) => {
@@ -40,7 +38,7 @@ function install(code, config) {
                                 .update(resource)
                                 .digest('hex')
                                 .substring(0, 7) + '.js';
-            let outputFile = path.join(config.outputDir, hashName);
+            let outputFile = path.join(outputDir, hashName);
 
             // handle external resources
             if (url.parse(resource).host) {

@@ -6,7 +6,23 @@ let Promise = require('bluebird'),
     fs      = require('fs'),
     glob    = Promise.promisify(require('glob'));
 
-const loadConfig =_.curry(function configLoader(cwd, globStrs) {
+const loadPackagerConfig = function(cwd, file = './config.json') {
+    return new Promise((resolve, error) => {
+        fs.readFile(path.resolve(cwd, file), (err, data) => {
+            if (err) {
+                return error('error loading config: ' + err);
+            }
+            try {
+                data = JSON.parse(data);
+                resolve(data);
+            } catch (e) {
+                error('error parsing config: ' + e);
+            }
+        });
+    });
+};
+
+const loadAccountConfig =_.curry(function configLoader(cwd, globStrs) {
     if (!Array.isArray(globStrs)) {
         globStrs = [ globStrs ];
     }
@@ -192,7 +208,8 @@ function copy(obj) {
 }
 
 module.exports = {
-    loadConfig,
+    loadAccountConfig,
+    loadPackagerConfig,
     getPrebidInstallList,
     getCodeList,
     resolveAbsolutePaths,

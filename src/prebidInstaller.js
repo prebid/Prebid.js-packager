@@ -11,21 +11,19 @@ let path        = require('path'),
     fs          = require('fs');
 
 function install(versions, config) {
-    config = Object.assign({
-        workingDir: './_tmp/prebid',
-        outputDir: './build/prebid'
-    }, config);
+    let workingDir = path.join(config.workingDir, 'prebid');
+    let outputDir = path.join(config.outputDir, 'prebid');
 
     console.log("Cleaning prebid installer working directory...");
 
-    shell.rm('-rf', config.workingDir);
+    shell.rm('-rf', workingDir);
 
     return (
 
         // download .tgz files of each version specified
         Promise.all(versions.map(version => new Promise((resolve, reject) => {
             let npmVersion = version;
-            let installPath = path.join(config.workingDir, 'packages', sanitize(version, {
+            let installPath = path.join(workingDir, 'packages', sanitize(version, {
                 replacement: '~'
             }));
 
@@ -94,14 +92,14 @@ function install(versions, config) {
         .then(files =>
             new lerna.InitCommand([], {
                 loglevel: 'silent'
-            }, config.workingDir).run()
+            }, workingDir).run()
             .then(() => {
                 console.log("Installing Prebid.js dependencies across all verisons...");
 
                 return new lerna.BootstrapCommand([], {
                     loglevel: 'silent',
                     hoist: true
-                }, config.workingDir).run();
+                }, workingDir).run();
 
             }).then(() => {
                 console.log("Building all Prebid.js versions...");
@@ -114,7 +112,7 @@ function install(versions, config) {
                 return new lerna.RunCommand(['build'], {
                     loglevel: 'silent',
                     parallel: false
-                }, config.workingDir).run()
+                }, workingDir).run()
                     .then(() => {
                         console.log = oldLog
                     })
@@ -126,7 +124,7 @@ function install(versions, config) {
 
         // copy files to build destination
         .then(prebids => Promise.all(prebids.map(prebid => new Promise((resolve, reject) => {
-            let outputDirForVersion = path.join(config.outputDir, prebid.version);
+            let outputDirForVersion = path.join(outputDir, prebid.version);
             shell.mkdir('-p', outputDirForVersion);
             shell.cp(path.join(prebid.buildDir, '*'), outputDirForVersion);
 
@@ -145,18 +143,18 @@ function install(versions, config) {
         .then(results => results.reduce((memo, result) => {
             let manifest = {};
 
-            let outputDir = path.join(config.outputDir, result.version);
+            let outputDirForVersion = path.join(outputDir, result.version);
 
             manifest.modules = result.buildFiles.map(file => path.basename(file, '.js'))
                 .filter((module) => {
                     if (module === 'prebid-core') {
-                        manifest.main = path.join(outputDir, 'prebid-core.js');
+                        manifest.main = path.join(outputDirForVersion, 'prebid-core.js');
                         return false;
                     }
                     return true;
                 })
                 .reduce((modules, module) => {
-                    modules[module] = path.join(outputDir, module + '.js');
+                    modules[module] = path.join(outputDirForVersion, module + '.js');
                     return modules;
                 }, {});
 

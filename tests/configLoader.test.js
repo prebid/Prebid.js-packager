@@ -3,14 +3,15 @@ let _ = require('lodash');
 let path = require('path');
 
 let {
-    loadConfig,
+    loadAccountConfig,
+    loadPackagerConfig,
     resolveAbsolutePaths,
     validateConfigs,
     getPrebidInstallList,
     getCodeList
 } = require('../src/configLoader');
 
-let configLoader = loadConfig(__dirname);
+let configLoader = loadAccountConfig(__dirname);
 
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj));
