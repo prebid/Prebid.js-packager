@@ -125,6 +125,9 @@ function install(versions, config) {
         // copy files to build destination
         .then(prebids => Promise.all(prebids.map(prebid => new Promise((resolve, reject) => {
             let outputDirForVersion = path.join(outputDir, prebid.version);
+
+            shell.rm('-rf', outputDirForVersion);
+
             shell.mkdir('-p', outputDirForVersion);
             shell.cp(path.join(prebid.buildDir, '*'), outputDirForVersion);
 

@@ -6,19 +6,56 @@ let Promise = require('bluebird'),
     fs      = require('fs'),
     glob    = Promise.promisify(require('glob'));
 
-const loadPackagerConfig = function(cwd, file = './config.json') {
-    return new Promise((resolve, error) => {
+function deepUpdate(obj, func) {
+    let newObj = {};
+    for (let i in obj) {
+        if (obj.hasOwnProperty(i)) {
+            if (obj[i] !== null && typeof(obj[i]) === "object") {
+                newObj[i] = deepUpdate(obj[i], func);
+            } else {
+                newObj[i] = func.apply(this, [obj[i]], i);
+            }
+        }
+    }
+    return newObj;
+}
+
+
+function resolveFile(cwd, str) {
+    // if it's not a string or it is a url, don't do anything
+    if (typeof str !== 'string' || url.parse(str).host) {
+        return str;
+    }
+
+    // if it's already an absolute path, don't do anything
+    if (path.isAbsolute(str)) {
+        return str;
+    }
+
+    // otherwise, translate to absolute path from relative
+    return path.resolve(cwd, str);
+}
+
+const loadPackagerConfig = function(cwd, file) {
+    let configFiles = [resolveFile(__dirname, '../config.json')];
+    if (file) {
+        file = resolveFile(cwd, file);
+        configFiles.push(file);
+    }
+    return Promise.all(configFiles.map(file => new Promise((resolve, reject) => {
         fs.readFile(path.resolve(cwd, file), (err, data) => {
             if (err) {
-                return error('error loading config: ' + err);
+                return reject('error loading config file: ' + err);
             }
             try {
-                data = JSON.parse(data);
+                data = deepUpdate(JSON.parse(data), resolveFile.bind(null, path.dirname(file)));
                 resolve(data);
             } catch (e) {
-                error('error parsing config: ' + e);
+                reject('error parsing config file: ' + e);
             }
         });
+    }))).then(results => {
+       return _.merge.apply(null, results);
     });
 };
 
@@ -65,6 +102,8 @@ const loadAccountConfig =_.curry(function configLoader(cwd, globStrs) {
 function resolveAbsolutePaths(workingDir, configs) {
     configs = copy(configs);
 
+    let resolve = resolveFile.bind(null, workingDir);
+
     _.forEach(configs, config => {
         if (typeof config.packages === 'object') {
             _.forEach(config.packages, pkg => {
@@ -76,21 +115,6 @@ function resolveAbsolutePaths(workingDir, configs) {
             });
         }
     });
-
-    function resolve(str) {
-        // if it's a url, don't do anything
-        if (url.parse(str).host) {
-            return str;
-        }
-
-        // if it's already an absolute path, don't do anything
-        if (path.isAbsolute(str)) {
-            return str;
-        }
-
-        // otherwise, translate to absolute path from relative
-        return path.resolve(workingDir, str);
-    }
 
     return configs;
 }

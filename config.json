@@ -1,4 +1,8 @@
 {
   "workingDir": "./_tmp",
-  "outputDir": "./build"
+  "outputDir": "./build",
+  "prebidCache": {
+    "adapter": "./src/adapters/prebidCache/file.js",
+    "cacheDir": "./build/prebid"
+  }
 }

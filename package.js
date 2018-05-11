@@ -10,5 +10,5 @@ if (!configPaths || !configPaths.length) {
     process.exit(1);
 }
 
-run(process.cwd(), configPaths, argv.config || './config.json');
+run(process.cwd(), configPaths, argv.config);
 
