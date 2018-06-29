@@ -7,7 +7,7 @@ let Promise = require('bluebird'),
     glob    = Promise.promisify(require('glob'));
 
 function deepUpdate(obj, func) {
-    let newObj = {};
+    let newObj = Array.isArray(obj) ? [] : {};
     for (let i in obj) {
         if (obj.hasOwnProperty(i)) {
             if (obj[i] !== null && typeof(obj[i]) === "object") {

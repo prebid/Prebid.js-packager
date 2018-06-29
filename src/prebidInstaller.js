@@ -8,20 +8,40 @@ let path        = require('path'),
     exec        = require('child_process').exec,
     sanitize    = require('sanitize-filename'),
     through2    = require('through2'),
-    fs          = require('fs');
+    fs          = require('fs'),
+    loader      = require('./adapters/loader.js').loader;
 
 function install(versions, config) {
     let workingDir = path.join(config.workingDir, 'prebid');
     let outputDir = path.join(config.outputDir, 'prebid');
 
-    console.log("Cleaning prebid installer working directory...");
+    let loadCache = loader(config.adapter)('cache');
 
-    shell.rm('-rf', workingDir);
+    clean();
+
+    let cachedManifests = {};
 
     return (
+        // load cache if present
+        new Promise((resolve, reject) => {
+            Promise.all(versions.map(version => loadCache(version)))
+                .then(results => {
+                    results.forEach(result => {
+                        if(result) {
+                            Object.assign(cachedManifests, result);
+                        }
+                    });
+                    resolve(versions.reduce((memo, curr) => {
+                        if (!cachedManifests[curr]) {
+                            memo.push(curr);
+                        }
+                        return memo;
+                    }, []));
+                });
+        })
 
         // download .tgz files of each version specified
-        Promise.all(versions.map(version => new Promise((resolve, reject) => {
+        .then(results => Promise.all(results.map(version => new Promise((resolve, reject) => {
             let npmVersion = version;
             let installPath = path.join(workingDir, 'packages', sanitize(version, {
                 replacement: '~'
@@ -30,6 +50,9 @@ function install(versions, config) {
             if (semver.valid(version)) {
                 npmVersion = 'prebid.js@' + version;
             }
+
+            console.log(`Cleaning prebid installer working directory for version ${version} ...`);
+            shell.rm('-rf', path.join(workingDir, version));
 
             shell.mkdir('-p', installPath);
 
@@ -45,7 +68,7 @@ function install(versions, config) {
                     tgzFile: path.join(installPath, stdout.toString().trim())
                 })
             );
-        })))
+        }))))
 
         // expand .tgz files
         .then(prebids => Promise.all(prebids.map(prebid => new Promise((resolve, reject) => {
@@ -89,38 +112,44 @@ function install(versions, config) {
         }))))
 
         // install version dependencies and run build
-        .then(files =>
-            new lerna.InitCommand([], {
+        .then(files => {
+            let versions = files.map(file => file.version);
+
+            if (!files.length) {
+                return [];
+            }
+            return new lerna.InitCommand([], {
                 loglevel: 'silent'
             }, workingDir).run()
-            .then(() => {
-                console.log("Installing Prebid.js dependencies across all verisons...");
+                .then(() => {
+                    console.log(`Installing Prebid.js dependencies for versions: ${versions}...`);
 
-                return new lerna.BootstrapCommand([], {
-                    loglevel: 'silent',
-                    hoist: true
-                }, workingDir).run();
+                    return new lerna.BootstrapCommand([], {
+                        loglevel: 'silent',
+                        hoist: true
+                    }, workingDir).run();
 
-            }).then(() => {
-                console.log("Building all Prebid.js versions...");
+                }).then(() => {
+                    console.log(`Building Prebid.js versions: ${versions}...`);
 
-                // lerna run command uses console.log... so silence by replacement
-                let oldLog = console.log;
-                console.log = () => {};
+                    // lerna run command uses console.log... so silence by replacement
+                    let oldLog = console.log;
+                    console.log = () => {
+                    };
 
-                // run the command we created in package.json earlier
-                return new lerna.RunCommand(['build'], {
-                    loglevel: 'silent',
-                    parallel: false
-                }, workingDir).run()
-                    .then(() => {
-                        console.log = oldLog
-                    })
+                    // run the command we created in package.json earlier
+                    return new lerna.RunCommand(['build'], {
+                        loglevel: 'silent',
+                        parallel: false
+                    }, workingDir).run()
+                        .then(() => {
+                            console.log = oldLog
+                        })
 
-            }).then(() => files.map(file => Object.assign(file, {
-                buildDir: path.join(file.installPath, 'build/dist')
-            })))
-        )
+                }).then(() => files.map(file => Object.assign(file, {
+                    buildDir: path.join(file.installPath, 'build/dist')
+                })))
+        })
 
         // copy files to build destination
         .then(prebids => Promise.all(prebids.map(prebid => new Promise((resolve, reject) => {
@@ -163,12 +192,19 @@ function install(versions, config) {
 
             memo[result.version] = manifest;
             return memo;
-        }, {}))
+        }, cachedManifests))
 
         .catch(err => {
             console.log("error", err);
         })
+
+        .finally(clean)
     );
+
+    function clean() {
+        console.log("Cleaning prebid installer working directory...");
+        shell.rm('-rf', workingDir);
+    }
 }
 
 module.exports = {

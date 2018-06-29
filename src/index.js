@@ -11,9 +11,6 @@ module.exports = function run(cwd, configPaths, configFile) {
         .then(config => {
             let configLoader = loadAccountConfig(cwd);
 
-            console.log("Cleaning build directory...");
-            shell.rm('-rf', './build/prebid');
-
             configLoader(configPaths)
                 .then(pkgConfig => {
                     let versions = getPrebidInstallList(pkgConfig);

@@ -100,6 +100,8 @@ function buildFromManifest(cwd, manifest, modules, codes) {
     ]).then(results => {
         results.push(manifest.postfix);
         return results.join('\n');
+    }).catch(err => {
+       setTimeout(() => { throw err });
     });
 }
 
