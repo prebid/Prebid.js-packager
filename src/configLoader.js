@@ -59,45 +59,49 @@ const loadPackagerConfig = function(cwd, file) {
     });
 };
 
-const loadAccountConfig =_.curry(function configLoader(cwd, globStrs) {
-    if (!Array.isArray(globStrs)) {
-        globStrs = [ globStrs ];
-    }
+function loadAccountConfig(cwd, getAdapter) {
+    let configLoader = getAdapter('config');
 
-    return Promise.all(
-        globStrs.map(globStr => glob(globStr, {cwd: cwd}))
-    ).then(results => {
-        let configs = results.reduce(
-            (configs, files) => {
-                files.forEach(file => {
-                    let filePath = path.resolve(cwd, file);
-                    let config = require(filePath);
-
-                    let configWorkingDir = path.dirname(filePath);
-
-                    config = resolveAbsolutePaths(configWorkingDir, config);
-
-                    let [valid, msgs] = validateConfigs(config);
-
-                    if (!valid) {
-                        throw new Error(msgs.join(', '), file);
-                    } else {
-                        Object.assign(configs, config);
-                    }
-                });
-
-                return configs;
-            },
-            {}
-        );
-
-        if (!Object.keys(configs).length) {
-            throw `no configurations found for "${globStrs} in "${cwd}"`;
+    return function(globStrs) {
+        if (!Array.isArray(globStrs)) {
+            globStrs = [ globStrs ];
         }
 
-        return configs;
-    });
-});
+        return Promise.all(
+            globStrs.map(globStr => glob(globStr, {cwd: cwd}))
+        ).then(results => {
+            let configs = results.reduce(
+                (configs, files) => {
+                    files.forEach(file => {
+                        let filePath = path.resolve(cwd, file);
+                        let config = configLoader(filePath);
+
+                        let configWorkingDir = path.dirname(filePath);
+
+                        config = resolveAbsolutePaths(configWorkingDir, config);
+
+                        let [valid, msgs] = validateConfigs(config);
+
+                        if (!valid) {
+                            throw new Error(msgs.join(', '), file);
+                        } else {
+                            Object.assign(configs, config);
+                        }
+                    });
+
+                    return configs;
+                },
+                {}
+            );
+
+            if (!Object.keys(configs).length) {
+                throw `no configurations found for "${globStrs} in "${cwd}"`;
+            }
+
+            return configs;
+        });
+    }
+}
 
 function resolveAbsolutePaths(workingDir, configs) {
     configs = copy(configs);

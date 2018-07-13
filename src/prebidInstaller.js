@@ -8,14 +8,13 @@ let path        = require('path'),
     exec        = require('child_process').exec,
     sanitize    = require('sanitize-filename'),
     through2    = require('through2'),
-    fs          = require('fs'),
-    loader      = require('./adapters/loader.js').loader;
+    fs          = require('fs');
 
-function install(versions, config) {
+function install(versions, config, getAdapter) {
     let workingDir = path.join(config.workingDir, 'prebid');
     let outputDir = path.join(config.outputDir, 'prebid');
 
-    let loadCache = loader(config.adapter)('cache');
+    let cacheAdapter = getAdapter('cache');
 
     clean();
 
@@ -24,7 +23,7 @@ function install(versions, config) {
     return (
         // load cache if present
         new Promise((resolve, reject) => {
-            Promise.all(versions.map(version => loadCache(version)))
+            Promise.all(versions.map(version => cacheAdapter(version)))
                 .then(results => {
                     results.forEach(result => {
                         if(result) {

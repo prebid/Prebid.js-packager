@@ -6,10 +6,14 @@ let codeInstall = require('./codeInstaller.js').install;
 let { generatePackageManifests, write } = require('./packageBuilder.js');
 let { loadAccountConfig, loadPackagerConfig, getPrebidInstallList, getCodeList } = require('./configLoader');
 
+let loader  = require('./adapters/loader.js').loader;
+
 module.exports = function run(cwd, configPaths, configFile) {
     loadPackagerConfig(cwd, configFile)
         .then(config => {
-            let configLoader = loadAccountConfig(cwd);
+            let getAdapter = loader(config.adapter);
+
+            let configLoader = loadAccountConfig(cwd, getAdapter);
 
             configLoader(configPaths)
                 .then(pkgConfig => {
@@ -17,7 +21,7 @@ module.exports = function run(cwd, configPaths, configFile) {
                     let code = getCodeList(pkgConfig);
 
                     return Promise.all([
-                        prebidInstall(versions, config),
+                        prebidInstall(versions, config, getAdapter),
                         codeInstall(code, config)
                     ]).then(results => {
                         let packageDir = './build/packages';

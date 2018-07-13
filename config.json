@@ -7,6 +7,9 @@
       "config": {
         "cacheDirs": ["./buildCache", "./build/prebid"]
       }
+    },
+    "config": {
+      "src": "./src/adapters/config/json.js"
     }
   }
 }
