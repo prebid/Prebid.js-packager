@@ -69,35 +69,27 @@ function loadAccountConfig(cwd, getAdapter) {
 
         return Promise.all(
             globStrs.map(globStr => glob(globStr, {cwd: cwd}))
-        ).then(results => {
-            let configs = results.reduce(
-                (configs, files) => {
-                    files.forEach(file => {
-                        let filePath = path.resolve(cwd, file);
-                        let config = configLoader(filePath);
+        ).then(results => Promise.reduce(results, (configs, files) => {
+            return Promise.reduce(files, (configs, file) => {
+                let filePath = path.resolve(cwd, file);
+                return configLoader(filePath).then(config => {
+                    let configWorkingDir = path.dirname(filePath);
 
-                        let configWorkingDir = path.dirname(filePath);
+                    config = resolveAbsolutePaths(configWorkingDir, config);
 
-                        config = resolveAbsolutePaths(configWorkingDir, config);
+                    let [valid, msgs] = validateConfigs(config);
 
-                        let [valid, msgs] = validateConfigs(config);
-
-                        if (!valid) {
-                            throw new Error(msgs.join(', '), file);
-                        } else {
-                            Object.assign(configs, config);
-                        }
-                    });
-
-                    return configs;
-                },
-                {}
-            );
-
+                    if (!valid) {
+                        throw new Error(msgs.join(', '), file);
+                    } else {
+                        return Object.assign(configs, config);
+                    }
+                });
+            }, configs);
+        }, {})).then(configs => {
             if (!Object.keys(configs).length) {
                 throw `no configurations found for "${globStrs} in "${cwd}"`;
             }
-
             return configs;
         });
     }

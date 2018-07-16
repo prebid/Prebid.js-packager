@@ -1,6 +1,19 @@
 
-let fs = require('fs');
+let fs = require('fs'),
+    Promise = require('bluebird');
 
 module.exports = function(file) {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+    return new Promise((resolve, reject) => {
+        fs.readFile(file, 'utf8', (err, data) => {
+            if (err) {
+                return reject(err);
+            }
+            try {
+                resolve(JSON.parse(data));
+            } catch(e) {
+                reject(e);
+            }
+            resolve(data);
+        });
+    });
 };
