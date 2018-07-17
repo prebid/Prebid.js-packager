@@ -11,9 +11,8 @@ module.exports = function(file) {
             try {
                 resolve(JSON.parse(data));
             } catch(e) {
-                return reject(e);
+                reject(e);
             }
-            resolve(data);
         });
     });
 };

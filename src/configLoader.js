@@ -104,9 +104,9 @@ function resolveAbsolutePaths(workingDir, configs) {
         if (typeof config.packages === 'object') {
             _.forEach(config.packages, pkg => {
                if (Array.isArray(pkg.code)) {
-                   pkg.code = pkg.code.map(path => resolve(path));
+                   pkg.code = pkg.code.map(path => fs.existsSync(path) ? resolve(path) : path);
                } else if (typeof pkg.code === 'object') {
-                   pkg.code = _.mapValues(pkg.code, path => resolve(path));
+                   pkg.code = _.mapValues(pkg.code, path => fs.existsSync(path) ? resolve(path) : path);
                }
             });
         }
@@ -180,10 +180,10 @@ function validateConfigs(configs) {
                         if (pkg.code && typeof pkg.code !== "object") {
                             errors.push(`invalid "code" property for "${pkg.filename}" package`);
                         } else {
-                            _.forEach(pkg.code, path => {
-                                // if not a url and doesn't exist in filesystem then log error
-                                if (!url.parse(path).host && !fs.existsSync(path)) {
-                                    errors.push(`invalid code file specified: ${path}`);
+                            _.forEach(pkg.code, code => {
+                                // if not a code string, url, or doesn't exist in filesystem then log error
+                                if (!url.parse(code).host && !fs.existsSync(code) && typeof code !== 'string' ) {
+                                    errors.push(`invalid code specified: ${code}`);
                                 }
                             });
                         }

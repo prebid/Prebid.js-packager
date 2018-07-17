@@ -4,7 +4,7 @@
   "adapter": {
     "cache": {
       "src": "./src/adapters/cache/file.js",
-      "config": {
+      "options": {
         "cacheDirs": ["./buildCache", "./build/prebid"]
       }
     },

@@ -50,7 +50,7 @@ function install(code, config) {
                     }
                     resolve([resource, outputFile]);
                 });
-            } else {
+            } else if (fs.existsSync(resource)) {
                 console.log(`Copying code file ${resource}...`);
 
                 // TODO: maybe add some build tools here, like browserify or webpack and stuff
@@ -74,6 +74,14 @@ function install(code, config) {
                         resolve([resource, outputFile]);
                     });
                 });
+            } else {
+                fs.writeFile(outputFile, resource, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve([resource, outputFile]);
+                });
+                resolve([resource, outputFile]);
             }
         })))
     ).then(results => results.reduce((manifest, result) => {

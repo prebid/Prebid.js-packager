@@ -1,5 +1,6 @@
 
-let shell = require('shelljs');
+let shell = require('shelljs')
+    path  = require('path');
 
 let prebidInstall = require('./prebidInstaller.js').install;
 let codeInstall = require('./codeInstaller.js').install;
@@ -24,7 +25,7 @@ module.exports = function run(cwd, configPaths, configFile) {
                         prebidInstall(versions, config, getAdapter),
                         codeInstall(code, config)
                     ]).then(results => {
-                        let packageDir = './build/packages';
+                        let packageDir = path.join(config.outputDir, 'packages');
 
                         console.log("Ceaning package dir...");
                         shell.rm('-rf', packageDir);

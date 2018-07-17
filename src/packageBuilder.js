@@ -7,8 +7,8 @@ let _       = require('lodash'),
 
 function write(dir, manifestsObj) {
     _.forEach(manifestsObj, (manifest, filename) => {
+        shell.mkdir('-p', dir);
         if (path.extname(filename) === '.json') {
-            shell.mkdir('-p', dir);
             fs.writeFile(
                 path.join(dir, filename),
                 JSON.stringify(manifest, null, 2),
@@ -59,12 +59,6 @@ function buildFromManifest(cwd, manifest, modules, codes) {
     cwd = path.resolve(cwd);
 
     return Promise.all([
-        new Promise((resolve, reject) => {
-            fs.readFile(
-                path.join(cwd, manifest.main),
-                (err, data) => err ? reject(err) : resolve(data)
-            );
-        }),
         Promise.all(_.map(manifest.code, (codePath, code) => new Promise((resolve, reject) => {
             function readFile() {
                 fs.readFile(
@@ -81,6 +75,12 @@ function buildFromManifest(cwd, manifest, modules, codes) {
                 resolve('');
             }
         }))).then(results => results.filter(result => result).join('\n')),
+        new Promise((resolve, reject) => {
+            fs.readFile(
+                path.join(cwd, manifest.main),
+                (err, data) => err ? reject(err) : resolve(data)
+            );
+        }),
         Promise.all(_.map(manifest.modules, (modulePath, module) => new Promise((resolve, reject) => {
             function readFile() {
                 fs.readFile(
