@@ -3,10 +3,12 @@ let path        = require('path'),
     Promise     = require('bluebird'),
     lerna       = require('lerna'),
     shell       = require('shelljs'),
+    del         = require('del'),
     targz       = require('targz'),
     semver      = require('semver'),
     exec        = require('child_process').exec,
-    sanitize    = require('sanitize-filename'),
+    sanitizeFn  = require('sanitize-filename'),
+    crypto      = require('crypto'),
     through2    = require('through2'),
     fs          = require('fs');
 
@@ -42,16 +44,15 @@ function install(versions, config, getAdapter) {
         // download .tgz files of each version specified
         .then(results => Promise.all(results.map(version => new Promise((resolve, reject) => {
             let npmVersion = version;
-            let installPath = path.join(workingDir, 'packages', sanitize(version, {
-                replacement: '~'
-            }));
+            let sanitizedVersion = sanitize(version);
+            let installPath = path.join(workingDir, 'packages', sanitizedVersion);
 
             if (semver.valid(version)) {
                 npmVersion = 'prebid.js@' + version;
             }
 
             console.log(`Cleaning prebid installer working directory for version ${version} ...`);
-            shell.rm('-rf', path.join(workingDir, version));
+            del.sync(path.join(workingDir, version));
 
             shell.mkdir('-p', installPath);
 
@@ -63,6 +64,7 @@ function install(versions, config, getAdapter) {
                 (err, stdout) => err ? reject(err) : resolve({
                     version,
                     npmVersion,
+                    sanitizedVersion,
                     installPath,
                     tgzFile: path.join(installPath, stdout.toString().trim())
                 })
@@ -87,7 +89,10 @@ function install(versions, config, getAdapter) {
                                 let pkg = JSON.parse(chunk.toString());
 
                                 // make the names unique to help lerna operate correctly
-                                pkg.name = prebid.npmVersion.replace('@', '-');
+                                pkg.name = crypto.createHash("md5")
+                                    .update(prebid.npmVersion)
+                                    .digest('hex')
+                                    .substring(0, 7);
 
                                 // add the build commands to the script file for lerna to execute
                                 pkg.scripts.build = 'gulp webpack';
@@ -124,7 +129,7 @@ function install(versions, config, getAdapter) {
                     console.log(`Installing Prebid.js dependencies for versions: ${versions}...`);
 
                     return new lerna.BootstrapCommand([], {
-                        loglevel: 'silent',
+                        // loglevel: 'silent',
                         hoist: true
                     }, workingDir).run();
 
@@ -138,7 +143,7 @@ function install(versions, config, getAdapter) {
 
                     // run the command we created in package.json earlier
                     return new lerna.RunCommand(['build'], {
-                        loglevel: 'silent',
+                        // loglevel: 'silent',
                         parallel: false
                     }, workingDir).run()
                         .then(() => {
@@ -152,9 +157,9 @@ function install(versions, config, getAdapter) {
 
         // copy files to build destination
         .then(prebids => Promise.all(prebids.map(prebid => new Promise((resolve, reject) => {
-            let outputDirForVersion = path.join(outputDir, prebid.version);
+            let outputDirForVersion = path.join(outputDir, prebid.sanitizedVersion);
 
-            shell.rm('-rf', outputDirForVersion);
+            del.sync(outputDirForVersion);
 
             shell.mkdir('-p', outputDirForVersion);
             shell.cp(path.join(prebid.buildDir, '*'), outputDirForVersion);
@@ -174,7 +179,7 @@ function install(versions, config, getAdapter) {
         .then(results => results.reduce((memo, result) => {
             let manifest = {};
 
-            let outputDirForVersion = path.join(outputDir, result.version);
+            let outputDirForVersion = path.join(outputDir, result.sanitizedVersion);
 
             manifest.modules = result.buildFiles.map(file => path.basename(file, '.js'))
                 .filter((module) => {
@@ -200,9 +205,15 @@ function install(versions, config, getAdapter) {
         .finally(clean)
     );
 
+    function sanitize(name) {
+        return sanitizeFn(name, {
+            replacement: '~'
+        })
+    }
+
     function clean() {
         console.log("Cleaning prebid installer working directory...");
-        shell.rm('-rf', workingDir);
+        del.sync(workingDir);
     }
 }
 

@@ -6,24 +6,29 @@ let _       = require('lodash'),
 
 
 function write(dir, manifestsObj) {
-    _.forEach(manifestsObj, (manifest, filename) => {
-        shell.mkdir('-p', dir);
-        if (path.extname(filename) === '.json') {
-            fs.writeFile(
-                path.join(dir, filename),
-                JSON.stringify(manifest, null, 2),
-                err => {}
-            );
-        } else if (path.extname(filename) === '.js') {
-            buildFromManifest(dir, manifest).then(build => {
-               fs.writeFile(
-                   path.join(dir, filename),
-                   build,
-                   err => {}
-               );
-            });
-        }
-    });
+    return Promise.all(
+        Object.keys(manifestsObj).map(filename => new Promise((resolve, reject) => {
+            let manifest = manifestsObj[filename];
+
+            shell.mkdir('-p', dir);
+
+            if (path.extname(filename) === '.json') {
+                fs.writeFile(
+                    path.join(dir, filename),
+                    JSON.stringify(manifest, null, 2),
+                    err => err ? reject(err) : resolve(filename)
+                );
+            } else if (path.extname(filename) === '.js') {
+                buildFromManifest(dir, manifest).then(build => {
+                   fs.writeFile(
+                       path.join(dir, filename),
+                       build,
+                       err => err ? reject(err) : resolve(filename)
+                   );
+                });
+            }
+        }))
+    );
 }
 
 function generatePackageManifests(config, prebidManifest, codeManifest, relativeTo = '.') {

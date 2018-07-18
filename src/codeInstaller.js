@@ -1,5 +1,6 @@
 
 let shell   = require('shelljs'),
+    del     = require('del'),
     url     = require('url'),
     crypto  = require('crypto'),
     path    = require('path'),
@@ -29,7 +30,7 @@ function install(code, config) {
 
     console.log("Cleaning code installer working directory...");
 
-    shell.rm('-rf', workingDir);
+    del.sync(workingDir);
     shell.mkdir('-p', outputDir);
 
     return (

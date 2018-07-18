@@ -1,5 +1,5 @@
 
-let shell = require('shelljs')
+let del   = require('del'),
     path  = require('path');
 
 let prebidInstall = require('./prebidInstaller.js').install;
@@ -10,13 +10,13 @@ let { loadAccountConfig, loadPackagerConfig, getPrebidInstallList, getCodeList }
 let loader  = require('./adapters/loader.js').loader;
 
 module.exports = function run(cwd, configPaths, configFile) {
-    loadPackagerConfig(cwd, configFile)
+    return loadPackagerConfig(cwd, configFile)
         .then(config => {
             let getAdapter = loader(config.adapter);
 
             let configLoader = loadAccountConfig(cwd, getAdapter);
 
-            configLoader(configPaths)
+            return configLoader(configPaths)
                 .then(pkgConfig => {
                     let versions = getPrebidInstallList(pkgConfig);
                     let code = getCodeList(pkgConfig);
@@ -28,11 +28,11 @@ module.exports = function run(cwd, configPaths, configFile) {
                         let packageDir = path.join(config.outputDir, 'packages');
 
                         console.log("Ceaning package dir...");
-                        shell.rm('-rf', packageDir);
+                        del.sync(packageDir);
 
                         let manifests = generatePackageManifests(pkgConfig, results[0], results[1], packageDir);
-                        write(packageDir, manifests);
+                        return write(packageDir, manifests);
                     });
-                });
+                })
         });
 };

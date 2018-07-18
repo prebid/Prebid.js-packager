@@ -1,19 +1,23 @@
 
-let Promise = require('bluebird');
-let fs      = require('fs');
-let path    = require('path');
+let Promise     = require('bluebird');
+let fs          = require('fs');
+let path        = require('path');
+let sanitize    = require('sanitize-filename');
 
 module.exports = function(version) {
+    let sanitized = sanitize(version, {
+        replacement: '~'
+    });
     return new Promise((resolve, reject) => {
         let cacheDir = this.cacheDirs.filter(dir => {
-            return fs.existsSync(path.join(dir, version));
+            return fs.existsSync(path.join(dir, sanitized));
         });
 
         if (cacheDir.length === 0) {
             throw 'not found in any cache';
         }
 
-        fs.readdir(path.join(cacheDir[0], version), (err, files) => {
+        fs.readdir(path.join(cacheDir[0], sanitized), (err, files) => {
             if (err) {
                 reject(err);
             } else {
@@ -24,9 +28,9 @@ module.exports = function(version) {
         return files.reduce((memo, file) => {
             let name = path.basename(file, '.js');
             if (name === 'prebid-core') {
-                memo[version].main = path.resolve(cacheDir, version, file);
+                memo[version].main = path.resolve(cacheDir, sanitized, file);
             } else {
-                memo[version].modules[name] = path.resolve(cacheDir, version, file);
+                memo[version].modules[name] = path.resolve(cacheDir, sanitized, file);
             }
             return memo;
         }, {

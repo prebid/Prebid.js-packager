@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
+    "del": "^3.0.0",
     "glob": "^7.1.2",
     "lerna": "^2.5.1",
     "lodash": "^4.17.4",
