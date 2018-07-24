@@ -129,7 +129,7 @@ function install(versions, config, getAdapter) {
                     console.log(`Installing Prebid.js dependencies for versions: ${versions}...`);
 
                     return new lerna.BootstrapCommand([], {
-                        // loglevel: 'silent',
+                        loglevel: 'silent',
                         hoist: true
                     }, workingDir).run();
 
@@ -143,7 +143,7 @@ function install(versions, config, getAdapter) {
 
                     // run the command we created in package.json earlier
                     return new lerna.RunCommand(['build'], {
-                        // loglevel: 'silent',
+                        loglevel: 'silent',
                         parallel: false
                     }, workingDir).run()
                         .then(() => {
