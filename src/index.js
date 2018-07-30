@@ -9,14 +9,14 @@ let { loadAccountConfig, loadPackagerConfig, getPrebidInstallList, getCodeList }
 
 let loader  = require('./adapters/loader.js').loader;
 
-module.exports = function run(cwd, configPaths, configFile) {
+module.exports = function run(cwd, resources, configFile) {
     return loadPackagerConfig(cwd, configFile)
         .then(config => {
             let getAdapter = loader(config.adapter);
 
             let configLoader = loadAccountConfig(cwd, getAdapter);
 
-            return configLoader(configPaths)
+            return configLoader(resources)
                 .then(pkgConfig => {
                     let versions = getPrebidInstallList(pkgConfig);
                     let code = getCodeList(pkgConfig);

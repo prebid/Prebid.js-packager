@@ -3,13 +3,16 @@
   "outputDir": "./build",
   "adapter": {
     "cache": {
-      "src": "./src/adapters/cache/file.js",
+      "name": "file",
       "options": {
         "cacheDirs": ["./buildCache", "./build/prebid"]
       }
     },
     "config": {
-      "src": "./src/adapters/config/json.js"
+      "name": "json"
+    },
+    "arg": {
+      "name": "glob"
     }
   }
 }

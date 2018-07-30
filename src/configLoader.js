@@ -32,8 +32,12 @@ function resolveFile(cwd, str) {
         return str;
     }
 
-    // otherwise, translate to absolute path from relative
-    return path.resolve(cwd, str);
+    if (str.startsWith('.' + path.sep) || str.startsWith('..' + path.sep)) {
+        // otherwise, translate to absolute path from relative
+        return path.resolve(cwd, str);
+    }
+
+    return str;
 }
 
 const loadPackagerConfig = function(cwd, file) {
@@ -61,34 +65,36 @@ const loadPackagerConfig = function(cwd, file) {
 
 function loadAccountConfig(cwd, getAdapter) {
     let configLoader = getAdapter('config');
+    let argLoader = getAdapter('arg');
 
-    return function(globStrs) {
-        if (!Array.isArray(globStrs)) {
-            globStrs = [ globStrs ];
+    return function(resources) {
+        if (!Array.isArray(resources)) {
+            resources = [ resources ];
         }
 
         return Promise.all(
-            globStrs.map(globStr => glob(globStr, {cwd: cwd}))
-        ).then(results => Promise.reduce(results, (configs, files) => {
-            return Promise.reduce(files, (configs, file) => {
-                let filePath = path.resolve(cwd, file);
-                return configLoader(filePath).then(config => {
-                    let configWorkingDir = path.dirname(filePath);
+            resources.map(resource => argLoader(cwd, resource))
+        ).then(results => Promise.reduce(results, (configs, resources) => {
+            return Array.isArray(resources)
+                ? Promise.reduce(resources, loadResource, configs)
+                : loadResource(configs, resources);
 
-                    config = resolveAbsolutePaths(configWorkingDir, config);
+            function loadResource(configs, resource) {
+                return configLoader(resource).then(({path = cwd, config}) => {
+                    config = resolveAbsolutePaths(path, config);
 
                     let [valid, msgs] = validateConfigs(config);
 
                     if (!valid) {
-                        throw new Error(msgs.join(', '), file);
+                        throw new Error(msgs.join(', '), resource);
                     } else {
                         return Object.assign(configs, config);
                     }
                 });
-            }, configs);
+            }
         }, {})).then(configs => {
             if (!Object.keys(configs).length) {
-                throw `no configurations found for "${globStrs} in "${cwd}"`;
+                throw `no configurations found for "${resources} in "${cwd}"`;
             }
             return configs;
         });

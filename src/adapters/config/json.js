@@ -1,5 +1,6 @@
 
-let fs = require('fs'),
+let fs      = require('fs'),
+    path    = require('path'),
     Promise = require('bluebird');
 
 module.exports = function(file) {
@@ -9,7 +10,10 @@ module.exports = function(file) {
                 return reject(err);
             }
             try {
-                resolve(JSON.parse(data));
+                resolve({
+                    path: path.dirname(file),
+                    config: JSON.parse(data)
+                });
             } catch(e) {
                 reject(e);
             }
