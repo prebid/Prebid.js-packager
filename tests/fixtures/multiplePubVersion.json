@@ -32,6 +32,7 @@
       },
       {
         "filename": "pub3-site2.json",
+        "version": "1.15.0",
         "code": {
           "adUnits": "./adUnits2.js",
           "digitrust": "http://cdn.digitru.st/prod/1/digitrust.min.js"
@@ -40,17 +41,18 @@
     ]
   },
     "pub4": {
-    "version": "0.29.0",
     "packages": [
       {
         "filename": "pub4-site1.js",
+        "version": "0.29.0",
         "modules": [
           "appnexusBidAdapter",
           "rubiconBidAdapter"
         ]
       },
       {
-        "filename": "pub4-site1.json"
+        "filename": "pub4-site1.json",
+        "version": "0.29.0"
       }
     ]
   }

@@ -35,9 +35,9 @@ function generatePackageManifests(config, prebidManifest, codeManifest, relative
     return _.reduce(config, (manifests, config) => {
         config.packages.forEach(pkg => {
             let manifest = manifests[pkg.filename] = {
-                main: path.relative(relativeTo, prebidManifest[config.version].main),
+                main: path.relative(relativeTo, prebidManifest[pkg.version || config.version].main),
                 modules: _.mapValues(
-                    prebidManifest[config.version].modules,
+                    prebidManifest[pkg.version || config.version].modules,
                     modulePath => path.relative(relativeTo, modulePath)
                 ),
                 postfix: "pbjs.processQueue();"

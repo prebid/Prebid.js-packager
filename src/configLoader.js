@@ -132,7 +132,7 @@ function validateConfigs(configs) {
         }
 
         _.forEach(configs, (config, name) => {
-            if (typeof config.version !== "string") {
+            if (config.version && typeof config.version !== "string") {
                 errors.push(`invalid version for "${name}" config`);
             }
 
@@ -154,7 +154,7 @@ function validateConfigs(configs) {
 
                     let unknownProperties = _.difference(
                         Object.keys(pkg),
-                        ['filename', 'modules', 'code']
+                        ['filename', 'modules', 'code', 'version']
                     );
 
                     if (unknownProperties.length > 0) {
@@ -183,6 +183,10 @@ function validateConfigs(configs) {
                             errors.push(`invalid extension supplied for package.filename in "${name} config`);
                         }
 
+                        if (!config.version && typeof pkg.version !== "string") {
+                            errors.push(`invalid version for "${pkg.filename}" package`);
+                        }
+
                         if (pkg.code && typeof pkg.code !== "object") {
                             errors.push(`invalid "code" property for "${pkg.filename}" package`);
                         } else {
@@ -209,7 +213,14 @@ function validateConfigs(configs) {
 function getPrebidInstallList(configs) {
     return Object.keys(
         _.reduce(configs, (list, config) => {
-            list[config.version] = true;
+            if (config.version) {
+                list[config.version] = true;
+            }
+            config.packages.forEach(pkg => {
+               if (pkg.version) {
+                   list[pkg.version] = true;
+               }
+            });
             return list;
         }, {}
         )
