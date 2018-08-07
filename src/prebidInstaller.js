@@ -198,10 +198,6 @@ function install(versions, config, getAdapter) {
             return memo;
         }, cachedManifests))
 
-        .catch(err => {
-            console.log("error", err);
-        })
-
         .finally(clean)
     );
 
