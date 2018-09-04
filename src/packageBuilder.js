@@ -12,18 +12,20 @@ function write(dir, manifestsObj) {
 
             shell.mkdir('-p', dir);
 
+            let filePath = path.join(dir, filename);
+
             if (path.extname(filename) === '.json') {
                 fs.writeFile(
-                    path.join(dir, filename),
+                    filePath,
                     JSON.stringify(manifest, null, 2),
-                    err => err ? reject(err) : resolve(filename)
+                    err => err ? reject(err) : resolve(filePath)
                 );
             } else if (path.extname(filename) === '.js') {
                 buildFromManifest(dir, manifest).then(build => {
                    fs.writeFile(
-                       path.join(dir, filename),
+                       filePath,
                        build,
-                       err => err ? reject(err) : resolve(filename)
+                       err => err ? reject(err) : resolve(filePath)
                    );
                 });
             }

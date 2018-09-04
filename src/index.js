@@ -9,6 +9,15 @@ let { loadAccountConfig, loadPackagerConfig, getPrebidInstallList, getCodeList }
 
 let loader  = require('./adapters/loader.js').loader;
 
+/**
+ * Main run function for the packager.  Can be used directly in node (as main export) or from the command-line when
+ * invoked from package.js manually or using npm start
+ *
+ * @param {string} cwd the current working directory to use for relative pathing in configuration files and resources
+ * @param {string[]} resources that the packager will be working with
+ * @param {string} configFile file path to a custom configuation file
+ * @returns {Promise.<string[]>} Resolves with an array of the newly generated build files
+ */
 module.exports = function run(cwd, resources, configFile) {
     return loadPackagerConfig(cwd, configFile)
         .then(config => {

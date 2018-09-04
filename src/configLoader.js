@@ -40,6 +40,15 @@ function resolveFile(cwd, str) {
     return str;
 }
 
+/**
+ * Config loader function responsible for (optionally) loading a custom packager configuration file as well as the base
+ * configuration file and merging the results.  Also resolves all relative file path properties to be absolute paths in
+ * relation to the passed in cwd.
+ *
+ * @param {string} cwd The directory to resolve relative path properties against.
+ * @param [file] An optional custom configuration file that is merged with and can override properties of the base config file.
+ * @returns {Promise.<object>} Resolves with the resulting configuration object.
+ */
 const loadPackagerConfig = function(cwd, file) {
     let configFiles = [resolveFile(__dirname, '../config.json')];
     if (file) {
@@ -63,6 +72,13 @@ const loadPackagerConfig = function(cwd, file) {
     });
 };
 
+/**
+ * Account config loader.  Loads account configuration files as described in src/configSchema.json.
+ *
+ * @param {string} cwd The directory to resolve relative path properties against.
+ * @param {function} getAdapter An adapter locator function.
+ * @returns {function: Promise}
+ */
 function loadAccountConfig(cwd, getAdapter) {
     let configLoader = getAdapter('config');
     let argLoader = getAdapter('arg');
