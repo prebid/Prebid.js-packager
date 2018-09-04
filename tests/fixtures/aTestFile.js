@@ -1,1 +1,1 @@
-module.exports = "old";
+module.exports = "new";
