@@ -27,14 +27,16 @@ function resolveFile(cwd, str) {
         return str;
     }
 
+    let [filePath, hash] = str.split(':');
+
     // if it's already an absolute path, don't do anything
-    if (path.isAbsolute(str)) {
+    if (path.isAbsolute(filePath)) {
         return str;
     }
 
-    if (str.startsWith('.' + path.sep) || str.startsWith('..' + path.sep)) {
+    if (filePath.startsWith('.' + path.sep) || filePath.startsWith('..' + path.sep)) {
         // otherwise, translate to absolute path from relative
-        return path.resolve(cwd, str);
+        return path.resolve(cwd, filePath) + (hash ? ':' + hash : '');
     }
 
     return str;
@@ -110,9 +112,9 @@ function resolveAbsolutePaths(workingDir, configs) {
         if (typeof config.packages === 'object') {
             _.forEach(config.packages, pkg => {
                if (Array.isArray(pkg.code)) {
-                   pkg.code = pkg.code.map(path => fs.existsSync(path) ? resolve(path) : path);
+                   pkg.code = pkg.code.map(path => fs.existsSync(resolve(path).split(':')[0]) ? resolve(path) : path);
                } else if (typeof pkg.code === 'object') {
-                   pkg.code = _.mapValues(pkg.code, path => fs.existsSync(path) ? resolve(path) : path);
+                   pkg.code = _.mapValues(pkg.code, path => fs.existsSync(resolve(path).split(':')[0]) ? resolve(path) : path);
                }
             });
         }

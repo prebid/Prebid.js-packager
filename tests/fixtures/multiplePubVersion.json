@@ -35,6 +35,8 @@
         "version": "1.15.0",
         "code": {
           "adUnits": "./adUnits2.js",
+          "aTestFile": "./aTestFile.js:267af7",
+          "javascript": "console.log('hi');",
           "digitrust": "http://cdn.digitru.st/prod/1/digitrust.min.js"
         }
       }
