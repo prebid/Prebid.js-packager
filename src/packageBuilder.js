@@ -55,6 +55,7 @@ function generatePackageManifests(config, prebidManifest, codeManifest, relative
             }
 
             if (Array.isArray(pkg.modules)) {
+                manifest.moduleList = pkg.modules;
                 manifest.modules = _.filter(manifest.modules, (modulePath, module) => pkg.modules.includes(module));
             }
         });
@@ -106,7 +107,8 @@ function buildFromManifest(cwd, manifest, modules, codes) {
         }))).then(results => results.filter(result => result).join('\n'))
     ]).then(results => {
         results.push(manifest.postfix);
-        return results.join('\n');
+        manifest.moduleList = manifest.moduleList || [];
+        return results.join('\n').replace(/installedModules(\s||'')=(\s||'')\[\]/i, `installedModules=${JSON.stringify(manifest.moduleList)}`);
     }).catch(err => {
        setTimeout(() => { throw err });
     });

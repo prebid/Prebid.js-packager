@@ -15,6 +15,9 @@ describe('the builder', () => {
                 "modules": [
                     "../prebid/0.27.1/appnexusBidAdapter.js"
                 ],
+                "moduleList": [
+                    "appnexusBidAdapter",
+                ],
                 "code": [
                     "../code/34cb974.js"
                 ],
@@ -131,6 +134,10 @@ describe('the builder', () => {
                     "../prebid/1.0.0/appnexusBidAdapter.js",
                     "../prebid/1.0.0/rubiconBidAdapter.js"
                 ],
+                "moduleList": [
+                    "appnexusBidAdapter",
+                    "rubiconBidAdapter",
+                ],
                 "postfix": "pbjs.processQueue();"
             },
             "pub3-site2.json": {
@@ -208,6 +215,10 @@ describe('the builder', () => {
                 "modules": [
                     "../prebid/0.29.0/appnexusBidAdapter.js",
                     "../prebid/0.29.0/rubiconBidAdapter.js"
+                ],
+                "moduleList": [
+                    "appnexusBidAdapter",
+                    "rubiconBidAdapter",
                 ],
                 "postfix": "pbjs.processQueue();"
             },
