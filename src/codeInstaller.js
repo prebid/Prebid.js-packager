@@ -7,6 +7,7 @@ let shell   = require('shelljs'),
     http    = require('http'),
     fs      = require('fs'),
     uglify  = require('uglify-js'),
+    exec    = require('child_process').exec,
     _       = require('lodash');
 
 function download(url, dest, cb) {
@@ -41,6 +42,8 @@ function install(code, config) {
                                 .substring(0, 7) + '.js';
             let outputFile = path.join(outputDir, hashName);
 
+            let [filePath, hash] = resource.split(':');
+
             // handle external resources
             if (url.parse(resource).host) {
                 console.log(`Downloading code ${resource}...`);
@@ -51,12 +54,24 @@ function install(code, config) {
                     }
                     resolve([resource, outputFile]);
                 });
-            } else if (fs.existsSync(resource)) {
+            } else if (fs.existsSync(filePath)) {
                 console.log(`Copying code file ${resource}...`);
 
                 // TODO: maybe add some build tools here, like browserify or webpack and stuff
-                fs.readFile(resource, 'utf-8', (err, data) => {
-                    if (err) {
+                if (hash) {
+                    exec('git rev-parse --show-toplevel', (err, gitRoot) => {
+                        if (err) {
+                            return reject(err);
+                        }
+                        gitRoot = gitRoot.trim();
+                        exec(`git show ${hash}:${path.relative(gitRoot, filePath)}`, callback);
+                    });
+                } else {
+                    fs.readFile(filePath, 'utf-8', callback);
+                }
+
+                function callback(err, data) {
+                   if (err) {
                         return reject(err);
                     }
 
@@ -74,7 +89,7 @@ function install(code, config) {
                         }
                         resolve([resource, outputFile]);
                     });
-                });
+                }
             } else {
                 fs.writeFile(outputFile, resource, (err) => {
                     if (err) {

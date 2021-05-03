@@ -111,8 +111,10 @@ describe("the configuration loader", () => {
         let configs = getConfig('./fixtures/multiplePubVersion.json');
 
         let codeList = getCodeList(configs).sort();
-        expect(codeList[0]).toMatch('./adUnits.js');
-        expect(codeList[1]).toMatch('./adUnits2.js');
-        expect(codeList[2]).toMatch('digitrust.min.js');
+        expect(codeList[0]).toMatch('fixtures/aTestFile.js:267af7');
+        expect(codeList[1]).toMatch('fixtures/adUnits.js');
+        expect(codeList[2]).toMatch('fixtures/adUnits2.js');
+        expect(codeList[3]).toEqual('console.log(\'hi\');');
+        expect(codeList[4]).toMatch('digitrust.min.js');
     });
 });
