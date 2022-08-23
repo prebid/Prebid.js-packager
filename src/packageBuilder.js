@@ -33,6 +33,15 @@ function write(dir, manifestsObj) {
     );
 }
 
+function getDependenciesFile(depPath) {
+    try {
+        return JSON.parse(fs.readFileSync(depPath));
+    } catch (error) {
+        console.log(`No Dependencies File found at ${depPath}`);
+        
+    }
+}
+
 function generatePackageManifests(config, prebidManifest, codeManifest, relativeTo = '.') {
     return _.reduce(config, (manifests, config) => {
         config.packages.forEach(pkg => {
@@ -55,6 +64,19 @@ function generatePackageManifests(config, prebidManifest, codeManifest, relative
             }
 
             if (Array.isArray(pkg.modules)) {
+                const depFile = manifest.modules['dependencies.json'] || '';
+                const dependencies = getDependenciesFile(path.join(relativeTo, depFile));
+                if (dependencies) {
+                    const librariesToAdd = new Set();
+                    pkg.modules.forEach(mod => {
+                        if (Array.isArray(dependencies[`${mod}.js`])) {
+                            dependencies[`${mod}.js`].forEach(lib => librariesToAdd.add(lib));
+                        }
+                    });
+                    if (librariesToAdd.size) {
+                        pkg.modules.push(...librariesToAdd);
+                    }
+                }
                 manifest.moduleList = pkg.modules;
                 manifest.modules = _.filter(manifest.modules, (modulePath, module) => pkg.modules.includes(module));
             }
